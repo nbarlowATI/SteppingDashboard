@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 Bokeh dashboard for displaying plots of weekly step counts for different people.
 One tab shows line plots on a time axis, while another tab shows histograms of
@@ -10,21 +12,15 @@ and the cell values being the weekly step counts for those person/dates.
 import os
 import numpy as np
 import pandas as pd
+import argparse
 
-from bokeh.io import curdoc
-from bokeh.models.widgets import Tabs
+from server import run_server
 
-from scripts.timeseries_tab import timeseries_tab
-from scripts.histogram_tab import histo_tab
 
-input_filename = os.path.join(os.path.dirname(__file__),"data","steps2019.csv")
-df = pd.read_csv(input_filename)
-df["Date"] = pd.to_datetime(df["Date"])
-df = df.set_index("Date")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="bokeh dashboard for steps")
+    parser.add_argument("--host",help="hostname",default="0.0.0.0")
+    parser.add_argument("--port",help="port",default=5006)
+    args = parser.parse_args()
 
-tab0 = timeseries_tab(df)
-tab1 = histo_tab(df)
-
-tabs = Tabs(tabs = [tab0,tab1])
-
-curdoc().add_root(tabs)
+    run_server(args.host, args.port)

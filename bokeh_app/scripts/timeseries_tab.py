@@ -36,7 +36,8 @@ def timeseries_tab(dataframe):
             range_end = datetime.fromtimestamp(range_end/1000)
 
 
-        filtered_df = dataframe[name_list].loc[range_start: range_end]
+#        filtered_df = dataframe[name_list].loc[range_start: range_end]
+        filtered_df = dataframe.loc[range_start: range_end]
 
         source = ColumnDataSource(filtered_df)
         return source
@@ -67,7 +68,7 @@ def timeseries_tab(dataframe):
         names_to_plot = source.column_names[1:]
 
         time_series = figure(x_axis_type="datetime",
-                             plot_width=800, plot_height=550)
+                             plot_width=700, plot_height=550)
         hover = HoverTool(tooltips = [("Name","$name"),
                                       ("Date","@Date{%F}"),
                                       ("Steps","$y")],

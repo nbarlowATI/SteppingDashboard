@@ -8,4 +8,4 @@ WORKDIR /bokeh_app
 
 EXPOSE 5006:5006
 
-ENTRYPOINT ["bokeh","serve","--show","."]
+ENTRYPOINT ["python","main.py"]
