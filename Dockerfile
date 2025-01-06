@@ -1,8 +1,10 @@
 FROM continuumio/anaconda3:latest
 
-RUN pip install bokeh==1.4.0
+RUN pip install bokeh==3.6.2
 
 COPY ./bokeh_app /bokeh_app
+
+COPY ./data /data
 
 WORKDIR /bokeh_app
 

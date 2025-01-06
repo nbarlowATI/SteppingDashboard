@@ -8,9 +8,10 @@ import numpy as np
 import pandas as pd
 from bokeh.plotting import figure, show
 
-from bokeh.models import ColumnDataSource, HoverTool, Panel
+from bokeh.models import ColumnDataSource, HoverTool
+from bokeh.models.layouts import TabPanel
 from bokeh.models.widgets import CheckboxGroup, Slider, RangeSlider
-from bokeh.layouts import column, row, WidgetBox
+from bokeh.layouts import column, row
 from bokeh.palettes import Category20_16
 
 
@@ -33,7 +34,7 @@ def histo_tab(dataframe):
         return totals, means
 
 
-    def make_dataset(name_list, x_min=30000,x_max=130000, n_bins=40):
+    def make_dataset(name_list, x_min=20000,x_max=180000, n_bins=40):
         """
         return a column datasource
         """
@@ -60,7 +61,7 @@ def histo_tab(dataframe):
             tmp_df["average"] = means[name]
 
             # add this persons data to the overall hist_df
-            hist_df = hist_df.append(tmp_df)
+            hist_df = hist_df._append(tmp_df)
 
         # convert to a Bokeh ColumnDataSource and return it
         source = ColumnDataSource(hist_df)
@@ -90,7 +91,7 @@ def histo_tab(dataframe):
         return the bokeh figure
         """
         print("In make_plot")
-        p = figure(plot_height=600, plot_width=600,
+        p = figure(height=600, width=600,
                    x_axis_label='steps',y_axis_label="Count")
         p.quad(source=source,
                bottom=0, top='steps',
@@ -99,7 +100,7 @@ def histo_tab(dataframe):
                fill_color='colour',
                alpha=0.5,
                line_color='black',
-               legend='name')
+               legend_field='name')
 
         hover = HoverTool(tooltips = [("Name", "@name"),
                                       ("Total","@total"),
@@ -141,9 +142,9 @@ def histo_tab(dataframe):
     cds = make_dataset(initial_names)
     p=make_plot(cds)
 
-    controls = WidgetBox(selection, nbin_select, range_select)
+    controls = column(selection, nbin_select, range_select)
     # create row layout
     layout = row(controls, p)
     #turn this into a tab
-    tab = Panel(child=layout, title="Histograms")
+    tab = TabPanel(child=layout, title="Histograms")
     return tab

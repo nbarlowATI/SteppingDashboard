@@ -8,11 +8,12 @@ from datetime import date, datetime
 
 from bokeh.plotting import figure
 from bokeh.io import show, output_notebook
-from bokeh.models import ColumnDataSource, HoverTool, Panel
+from bokeh.models import ColumnDataSource, HoverTool
+from bokeh.models.layouts import TabPanel, Tabs
 from bokeh.models.widgets import (CheckboxGroup, Slider, DateRangeSlider,
-				  Tabs, CheckboxButtonGroup,
-				  TableColumn, DataTable, Select)
-from bokeh.layouts import column, row, WidgetBox
+				  CheckboxButtonGroup, TableColumn,
+				  DataTable, Select)
+from bokeh.layouts import column, row
 from bokeh.palettes import Category20_16
 
 
@@ -22,21 +23,24 @@ def timeseries_tab(dataframe):
     """
 
     def make_dataset(name_list,
-                     range_start='2019-01-01',
-                     range_end='2019-12-31'):
+                     range_start='2024-01-01',
+                     range_end='2024-12-31'):
         """
         Filter the full dataset by name and by date range,
         and return it as a Bokeh ColumnDataSource
         """
 
         ## why do I have to do this? What is the point of a DateRangeSlider???
-        if isinstance(range_start, int):
+        if isinstance(range_start, (int, float)):
             range_start = datetime.fromtimestamp(range_start/1000)
-        if isinstance(range_end, int):
+        elif isinstance(range_start, str):
+            range_start = datetime.fromisoformat(range_start)
+
+        if isinstance(range_end, (int, float)):
             range_end = datetime.fromtimestamp(range_end/1000)
+        elif isinstance(range_end, str):
+            range_end = datetime.fromisoformat(range_end)
 
-
-#        filtered_df = dataframe[name_list].loc[range_start: range_end]
         filtered_df = dataframe.loc[range_start: range_end]
 
         source = ColumnDataSource(filtered_df)
@@ -68,7 +72,7 @@ def timeseries_tab(dataframe):
         names_to_plot = source.column_names[1:]
 
         time_series = figure(x_axis_type="datetime",
-                             plot_width=700, plot_height=550)
+                             width=700, height=550)
         hover = HoverTool(tooltips = [("Name","$name"),
                                       ("Date","@Date{%F}"),
                                       ("Steps","$y")],
@@ -117,9 +121,9 @@ def timeseries_tab(dataframe):
 
     name_selection.on_change('active',update_lines)
 
-    date_slider = DateRangeSlider(title="Date range", start=date(2019,1,1),
-                                  end=date(2019,12,31),
-                                  value=(date(2019,1,1),date(2019,12,31)),
+    date_slider = DateRangeSlider(title="Date range", start=date(2024,1,1),
+                                  end=date(2024,12,31),
+                                  value=(date(2024,1,1),date(2024,12,31)),
                                   step=1)
     date_slider.on_change('value',update)
 
@@ -129,8 +133,8 @@ def timeseries_tab(dataframe):
                        date_slider.value[1])
     p = make_plot(cds)
 
-    controls = WidgetBox(name_selection, date_slider)
+    controls = column(name_selection, date_slider)
     layout = row(controls, p)
 
-    tab = Panel(child=layout, title="Time series")
+    tab = TabPanel(child=layout, title="Time series")
     return tab
