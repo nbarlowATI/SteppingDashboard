@@ -20,38 +20,30 @@ from scripts.timeseries_tab import timeseries_tab
 from scripts.histogram_tab import histo_tab
 
 
-def prepare_data():
+def prepare_data(year=None):
+    if year:
+        filename = f"steps{year}.csv"
+    else:
+        filename = "all_years.csv"
     input_filename = os.path.join(os.path.dirname(__file__), "..",
-                                  "data","steps2024.csv")
+                                  "data",filename)
     df = pd.read_csv(input_filename)
     df["Date"] = pd.to_datetime(df["Date"])
     df = df.set_index("Date")
     return df
 
-def create_tabs(df):
-    tab0 = timeseries_tab(df)
+def create_tabs(df, df_allyears):
+    tab0 = timeseries_tab(df, "2024")
     tab1 = histo_tab(df)
+    tab2 = timeseries_tab(df_allyears, "all years")
 
-    tabs = Tabs(tabs = [tab0,tab1])
+    tabs = Tabs(tabs = [tab0,tab1, tab2])
     return tabs
 
 def create_dashboard(doc):
-    df = prepare_data()
-    tabs = create_tabs(df)
-    doc.add_root(tabs)
-
-
-def minimal_dashboard(doc):
-    print("Minimal dashboard is running...")
-    p1 = figure(title="Tab 1")
-    p1.line([1, 2, 3], [4, 6, 2])
-    tab1 = Panel(child=p1, title="Tab 1")
-
-    p2 = figure(title="Tab 2")
-    p2.circle([1, 2, 3], [4, 6, 2])
-    tab2 = Panel(child=p2, title="Tab 2")
-
-    tabs = Tabs(tabs=[tab1, tab2])
+    df = prepare_data("2024")
+    df_all_years = prepare_data()
+    tabs = create_tabs(df, df_all_years)
     doc.add_root(tabs)
 
 

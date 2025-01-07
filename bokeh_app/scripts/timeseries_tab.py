@@ -4,7 +4,7 @@ Return a Bokeh panel showing line charts of steps vs time
 
 import numpy as np
 import pandas as pd
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from bokeh.plotting import figure
 from bokeh.io import show, output_notebook
@@ -17,14 +17,14 @@ from bokeh.layouts import column, row
 from bokeh.palettes import Category20_16
 
 
-def timeseries_tab(dataframe):
+def timeseries_tab(dataframe, title):
     """
     return a tab showing steps vs time for each person
     """
 
     def make_dataset(name_list,
-                     range_start='2024-01-01',
-                     range_end='2024-12-31'):
+                     range_start,
+                     range_end):
         """
         Filter the full dataset by name and by date range,
         and return it as a Bokeh ColumnDataSource
@@ -112,6 +112,10 @@ def timeseries_tab(dataframe):
                 p.select_one({"name": name}).visible = False
 
     ### back to the timeseries_tab function
+
+    earliest_date = dataframe.index[0] - timedelta(days=1)
+    latest_date = dataframe.index[len(dataframe)-1] + timedelta(days=1)
+
     names = list(dataframe.columns)
     names.sort()
 
@@ -121,9 +125,9 @@ def timeseries_tab(dataframe):
 
     name_selection.on_change('active',update_lines)
 
-    date_slider = DateRangeSlider(title="Date range", start=date(2024,1,1),
-                                  end=date(2024,12,31),
-                                  value=(date(2024,1,1),date(2024,12,31)),
+    date_slider = DateRangeSlider(title="Date range", start=earliest_date,
+                                  end=latest_date,
+                                  value=(earliest_date,latest_date),
                                   step=1)
     date_slider.on_change('value',update)
 
@@ -136,5 +140,5 @@ def timeseries_tab(dataframe):
     controls = column(name_selection, date_slider)
     layout = row(controls, p)
 
-    tab = TabPanel(child=layout, title="Time series")
+    tab = TabPanel(child=layout, title=title)
     return tab
